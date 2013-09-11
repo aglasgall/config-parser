@@ -1,23 +1,30 @@
 require 'set'
 
+# trivial extension of Hash to allow access of keys via method call
 class ConfigHash < Hash
   def method_missing(sel, *args)
     self[sel]
   end
 end
 
+# signal parse errors by raising an exception
 class ConfigSyntaxError < StandardError
 end
 
+
+# helper functions for extracting values from parsed-out parameter values
+
 def parse_raw_value(raw_value)
   case raw_value
-  when /\A\d+\Z/
+  when /\A\d+\Z/ # parse numbers as numbers
     value = raw_value.to_i
-  when /\A"([^"]*)"\Z/
+  when /\A"([^"]*)"\Z/ # parse quoted strings as strings
     value = $1
-  when /.+,.+/
+    # if it contains a comma with stuff on either side AND
+    # isn't wholly enclosed in quotes, it's a list
+  when /.+,.+/ 
     value = raw_value.split(/,/)
-  else
+  else # otherwise, it's just a raw string
     value = raw_value
   end
 end
@@ -35,7 +42,6 @@ end
     
 def load_config(path, overrides=[])
   override_set = Set.new(overrides.map(&:to_s))
-  state = :toplevel
   current_section_name = nil
   sections = ConfigHash.new
 
