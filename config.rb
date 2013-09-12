@@ -43,7 +43,7 @@ end
 def load_config(path, overrides=[])
   override_set = Set.new(overrides.map(&:to_s))
   current_section_name = nil
-  sections = ConfigHash.new
+  sections = ConfigHash.new(ConfigHash.new(nil)) 
 
   open(path) do |f|
     f.each do |line|
